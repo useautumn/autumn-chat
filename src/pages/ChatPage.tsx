@@ -25,7 +25,13 @@ import Image from "next/image";
 
 // Refer to https://ai-sdk.dev/docs/ai-sdk-ui/chatbot
 
-export default function Chat() {
+export default function Chat({
+  messages: initialMessages,
+  pricingModel: initialPricingModel,
+}: {
+  messages: string;
+  pricingModel: string;
+}) {
   const {
     messages,
     setMessages,
@@ -47,6 +53,18 @@ export default function Chat() {
       };
     },
   });
+
+  useEffect(() => {
+    if (initialMessages) {
+      setMessages(JSON.parse(initialMessages));
+    }
+  }, [initialMessages, setMessages]);
+
+  useEffect(() => {
+    if (initialPricingModel) {
+      setPricingModel(JSON.parse(initialPricingModel));
+    }
+  }, [initialPricingModel]);
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
 
@@ -73,6 +91,7 @@ export default function Chat() {
     }
   }, [pricingModel, status]);
 
+  // Load messages from localStorage on initial render
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedMessages = localStorage.getItem("chatMessages");
@@ -83,6 +102,7 @@ export default function Chat() {
     }
   }, [setMessages]);
 
+  // Save messages to localStorage whenever they change
   useEffect(() => {
     if (
       typeof window !== "undefined" &&
@@ -222,83 +242,18 @@ export default function Chat() {
 
   const clearChat = () => {
     setMessages([]);
-    setData([]);
-    setPricingModel(defaultPricingModel);
-    setInput("");
-    setAttachments([]);
+    // setData([]);
+    // setPricingModel(defaultPricingModel);
+    // setInput("");
+    // setAttachments([]);
 
-    localStorage.removeItem("chatMessages");
-    localStorage.removeItem("pricingModel");
+    // localStorage.removeItem("chatMessages");
+    // localStorage.removeItem("pricingModel");
   };
 
   return (
     <div className={cn("relative w-full h-fit flex flex-col")}>
-      <div className="flex flex-col h-full w-full justify-end pr-4 pointer-events-none p-2">
-        <div className="flex w-full justify-end">
-          <div
-            className={cn(
-              "flex flex-col justify-end h-full pointer-events-auto transition-all duration-300 ease-in-out",
-              messages.length > 0 ? "w-[400px]" : "w-full"
-            )}
-          >
-            <Messages
-              chatId={chatId}
-              status={status}
-              messages={messages}
-              setMessages={setMessages}
-              reload={reload}
-              isReadonly={false}
-              isArtifactVisible={false}
-              tab={tab}
-              setTab={setTab}
-              editorText={editorText}
-              setEditorText={setEditorText}
-              pricingModel={pricingModel}
-              setPricingModel={setPricingModel}
-              jsonError={jsonError}
-              setJsonError={setJsonError}
-              showChat={showChat}
-              setShowChat={setShowChat}
-            />
-            {/* <form className="flex py-4 px-0.5  mb-6 gap-2 w-full md:max-w-3xl"> */}
-            <div className="max-w-[600px]">
-              <MultimodalInput
-                chatId={chatId}
-                input={input}
-                setInput={setInput}
-                handleSubmit={handleSubmit}
-                status={status}
-                stop={stop}
-                attachments={attachments}
-                setAttachments={setAttachments}
-                messages={messages}
-                setMessages={setMessages}
-                append={append}
-                clearChat={clearChat}
-              />
-            </div>
-            {/* </form> */}
-          </div>
-        </div>
-        <div className="pointer-events-auto">
-          <PricingModel
-            pricingModel={pricingModel}
-            setPricingModel={setPricingModel}
-            editorText={editorText}
-            setEditorText={setEditorText}
-            tab={tab}
-            setTab={setTab}
-            jsonError={jsonError}
-            setJsonError={setJsonError}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-{
-  /* <div className="bg-[#F5F5F5] min-h-12 flex justify-between border-b border-stone-200 items-center">
+      {/* <div className="bg-[#F5F5F5] min-h-12 flex justify-between border-b border-stone-200 items-center">
         <div className="flex items-center gap-2 h-full py-0">
           <Tabs
             className="h-full border-r-1 border-zinc-200"
@@ -345,5 +300,66 @@ export default function Chat() {
             </Button>
           </div>
         </div>
-      </div> */
+      </div> */}
+      <div className="flex flex-col h-full w-full justify-end pr-4 pointer-events-none p-2">
+        <div className="flex w-full justify-end">
+          <div
+            className={cn(
+              "flex flex-col justify-end h-full pointer-events-auto transition-all duration-300 ease-in-out",
+              messages.length > 0 ? "w-[400px]" : "w-full"
+            )}
+          >
+            <Messages
+              chatId={chatId}
+              status={status}
+              messages={messages}
+              setMessages={setMessages}
+              reload={reload}
+              isReadonly={false}
+              isArtifactVisible={false}
+              tab={tab}
+              setTab={setTab}
+              editorText={editorText}
+              setEditorText={setEditorText}
+              pricingModel={pricingModel}
+              setPricingModel={setPricingModel}
+              jsonError={jsonError}
+              setJsonError={setJsonError}
+              showChat={showChat}
+              setShowChat={setShowChat}
+            />
+            <form className="flex py-4 px-0.5  mb-6 gap-2 w-full md:max-w-3xl">
+              <MultimodalInput
+                chatId={chatId}
+                input={input}
+                setInput={setInput}
+                handleSubmit={handleSubmit}
+                status={status}
+                stop={stop}
+                attachments={attachments}
+                setAttachments={setAttachments}
+                messages={messages}
+                setMessages={setMessages}
+                append={append}
+                clearChat={clearChat}
+                setShowChat={setShowChat}
+              />
+            </form>
+          </div>
+        </div>
+        <div className="pointer-events-auto">
+          <PricingModel
+            pricingModel={pricingModel}
+            setPricingModel={setPricingModel}
+            editorText={editorText}
+            setEditorText={setEditorText}
+            tab={tab}
+            setTab={setTab}
+            jsonError={jsonError}
+            setJsonError={setJsonError}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }

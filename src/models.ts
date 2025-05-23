@@ -1,0 +1,71 @@
+import { z } from "zod";
+
+export enum ProductItemInterval {
+  // Reset interval
+  Minute = "minute",
+  Hour = "hour",
+  Day = "day",
+  Week = "week",
+
+  // Billing interval
+  Month = "month",
+  Quarter = "quarter",
+  SemiAnnual = "semi_annual",
+  Year = "year",
+}
+
+export enum UsageModel {
+  Prepaid = "prepaid",
+  PayPerUse = "pay_per_use",
+}
+
+export const ProductItemSchema = z.object({
+  // Feature stuff
+  feature_id: z.string().min(1).nullish(),
+  included_usage: z.union([z.number(), z.literal("inf")]).nullish(),
+  interval: z.nativeEnum(ProductItemInterval).nullish(),
+
+  // Price config
+  usage_model: z.nativeEnum(UsageModel).nullish(),
+  price: z.number().nullish(),
+  billing_units: z.number().nullish(), // amount per billing unit (eg. $9 / 250 units)
+});
+
+export const ProductSchema = z.object({
+  internal_id: z.string().nullish(),
+
+  id: z.string(),
+  name: z.string(),
+  is_add_on: z.boolean(),
+  // is_default: z.boolean(),
+  items: z.array(ProductItemSchema),
+});
+
+export const FeatureSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: z.enum(["boolean", "single_use", "continuous_use", "credit_system"]),
+
+  display: z.object({
+    singular: z.string(),
+    plural: z.string(),
+  }),
+
+  credit_schema: z
+    .array(
+      z.object({
+        metered_feature_id: z.string(),
+        credit_cost: z.number(),
+      })
+    )
+    .nullish(),
+});
+
+export const PricingModelSchema = z.object({
+  features: z.array(FeatureSchema),
+  products: z.array(ProductSchema),
+});
+
+export type ProductItem = z.infer<typeof ProductItemSchema>;
+export type Feature = z.infer<typeof FeatureSchema>;
+export type Product = z.infer<typeof ProductSchema>;
