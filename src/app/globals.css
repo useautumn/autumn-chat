@@ -135,3 +135,47 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* Iframe isolation styles */
+html,
+body {
+  /* Prevent scroll chaining when embedded in iframe */
+  overscroll-behavior: contain;
+  /* Ensure the app doesn't trigger parent page scroll */
+  touch-action: pan-x pan-y;
+}
+
+/* Additional containment for when app is in iframe */
+@media (max-height: 600px), (max-width: 800px) {
+  html,
+  body {
+    contain: layout style paint;
+    overflow: hidden;
+  }
+
+  #__next,
+  [data-nextjs-scroll-focus-boundary] {
+    contain: layout style paint;
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+/* Prevent scroll propagation in scrollable areas */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior: contain;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ensure iframe doesn't interfere with parent */
+body {
+  /* Prevent momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+  /* Contain overflow behavior */
+  overscroll-behavior-y: contain;
+}

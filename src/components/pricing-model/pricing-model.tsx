@@ -63,8 +63,8 @@ export const PricingModel = ({
       .filter((p): p is NonNullable<typeof p> => p !== null) ?? [];
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="flex flex-col gap-2 p-8">
+    <div className="flex flex-col h-full w-full items-center">
+      <div className="flex flex-col gap-2 mt-10 max-w-[800px] w-full">
         <PricingTable products={pricecnProducts as any}>
           {pricecnProducts.map((p) => (
             <PricingCard key={p.id} productId={p.id} />

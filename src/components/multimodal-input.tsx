@@ -64,18 +64,6 @@ function PureMultimodalInput({
 
   const [messagePresent, setMessagePresent] = useState(messages.length > 0);
 
-  useEffect(() => {
-    if (messages.length > 0) {
-      setMessagePresent(true);
-    }
-  }, [messages]);
-
-  useEffect(() => {
-    if (textareaRef.current) {
-      adjustHeight();
-    }
-  }, []);
-
   const adjustHeight = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -98,6 +86,10 @@ function PureMultimodalInput({
   );
 
   useEffect(() => {
+    setMessagePresent(messages.length > 0);
+  }, [messages]);
+
+  useEffect(() => {
     if (textareaRef.current) {
       const domValue = textareaRef.current.value;
       // Prefer DOM value over localStorage to handle hydration
@@ -112,6 +104,14 @@ function PureMultimodalInput({
   useEffect(() => {
     setLocalStorageInput(input);
   }, [input, setLocalStorageInput]);
+
+  const { isAtBottom, scrollToBottom } = useScrollToBottom();
+
+  useEffect(() => {
+    if (status === "submitted") {
+      scrollToBottom();
+    }
+  }, [status, scrollToBottom]);
 
   const handleInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(event.target.value);
@@ -197,17 +197,9 @@ function PureMultimodalInput({
     [setAttachments]
   );
 
-  const { isAtBottom, scrollToBottom } = useScrollToBottom();
-
-  useEffect(() => {
-    if (status === "submitted") {
-      scrollToBottom();
-    }
-  }, [status, scrollToBottom]);
-
   return (
     <div className="relative w-full flex flex-col gap-4 ">
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {!isAtBottom && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -230,7 +222,7 @@ function PureMultimodalInput({
             </Button>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
 
       <input
         type="file"
@@ -273,9 +265,9 @@ function PureMultimodalInput({
           value={input}
           onChange={handleInput}
           className={cx(
-            "rounded-sm shadow-none outline-none focus:ring-0 focus:outline-none resize-none w-full",
+            "rounded-sm shadow-none outline-none focus:ring-0 focus:outline-none resize-none w-full overflow-hidden",
             messagePresent
-              ? "min-h-[90px] transition-all ease-in-out pb-[40px] border-2 border-gray-200 mt-4 bg-zinc-50"
+              ? "min-h-[100px] transition-all ease-in-out pb-[40px] border-2 border-gray-200 mt-4 bg-zinc-50"
               : "min-h-[60px] transition-all ease-in-out border-none",
             className
           )}
@@ -350,6 +342,7 @@ export const MultimodalInput = memo(
     if (prevProps.input !== nextProps.input) return false;
     if (prevProps.status !== nextProps.status) return false;
     if (!equal(prevProps.attachments, nextProps.attachments)) return false;
+    if (!equal(prevProps.messages, nextProps.messages)) return false;
     // if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType)
     //   return false;
 

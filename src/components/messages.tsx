@@ -1,7 +1,7 @@
 import type { UIMessage } from "ai";
 import { PreviewMessage, ThinkingMessage } from "./message";
 // import { Greeting } from './greeting';
-import { memo } from "react";
+import { memo, forwardRef, useImperativeHandle } from "react";
 // import type { Vote } from '@/lib/db/schema';
 import equal from "fast-deep-equal";
 import type { UseChatHelpers } from "@ai-sdk/react";
@@ -36,39 +36,52 @@ interface MessagesProps {
   setShowChat: (showChat: boolean) => void;
 }
 
-function PureMessages({
-  chatId,
-  status,
-  // votes,
-  messages,
-  setMessages,
-  reload,
-  isReadonly,
-  tab,
-  setTab,
-  editorText,
-  setEditorText,
-  pricingModel,
-  setPricingModel,
-  jsonError,
-  setJsonError,
-  showChat,
-  setShowChat,
-}: MessagesProps) {
+function PureMessages(
+  {
+    chatId,
+    status,
+    // votes,
+    messages,
+    setMessages,
+    reload,
+    isReadonly,
+    tab,
+    setTab,
+    editorText,
+    setEditorText,
+    pricingModel,
+    setPricingModel,
+    jsonError,
+    setJsonError,
+    showChat,
+    setShowChat,
+  }: MessagesProps,
+  ref: React.Ref<MessagesHandle>
+) {
   const {
     containerRef: messagesContainerRef,
     endRef: messagesEndRef,
     onViewportEnter,
     onViewportLeave,
     hasSentMessage,
+    scrollToBottom,
   } = useMessages({
     chatId,
     status,
+    messages,
   });
+
+  // Expose scrollToBottom function to parent component
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollToBottom,
+    }),
+    [scrollToBottom]
+  );
 
   return (
     <div
-      ref={messagesContainerRef}
       className={cn(
         "max-h-[500px] min-h-[500px] rounded-md flex flex-col",
         "bg-white/0 transition-opacity rounded-sm",
@@ -76,6 +89,10 @@ function PureMessages({
           ? "duration-1000 bg-white/100 shadow-md scale-100 opacity-100 translate-y-0"
           : "duration-500 bg-white/0 scale-95 opacity-0 -translate-y-4"
       )}
+      style={{
+        contain: "layout style paint",
+        overscrollBehavior: "contain",
+      }}
     >
       <div
         className={cn(
@@ -129,7 +146,31 @@ function PureMessages({
 
       {/* {messages.length === 0 && <Greeting />} */}
 
-      <div className="flex flex-col gap-6 flex-1 overflow-y-auto relative scrollbar-hide">
+      {tab === "code" && (
+        <CodeEditor
+          customConfig={editorText}
+          handleConfigChange={(value) => {
+            setEditorText(value);
+            try {
+              const parsed = JSON.parse(value);
+              setPricingModel(parsed);
+              setJsonError(false);
+            } catch (error) {
+              setJsonError(true);
+            }
+          }}
+          error={jsonError}
+        />
+      )}
+      <div
+        className="flex flex-col gap-6 flex-1 overflow-y-auto relative scrollbar-hide"
+        ref={tab == "pricing" ? messagesContainerRef : undefined}
+        style={{
+          contain: "layout style paint",
+          overscrollBehavior: "contain",
+          touchAction: "pan-y",
+        }}
+      >
         {tab === "pricing" && (
           <div className="pt-4 flex flex-col gap-6">
             {messages.map((message, index) => (
@@ -149,42 +190,27 @@ function PureMessages({
                 }
               />
             ))}
+
+            <motion.div
+              ref={messagesEndRef}
+              className="shrink-0 min-w-[24px] min-h-[24px]"
+              onViewportLeave={onViewportLeave}
+              onViewportEnter={onViewportEnter}
+            />
           </div>
-        )}
-        {tab === "code" && (
-          <CodeEditor
-            customConfig={editorText}
-            handleConfigChange={(value) => {
-              setEditorText(value);
-              try {
-                const parsed = JSON.parse(value);
-                setPricingModel(parsed);
-                setJsonError(false);
-              } catch (error) {
-                setJsonError(true);
-              }
-              setEditorText(value);
-            }}
-            error={jsonError}
-          />
         )}
       </div>
 
       {/* {status === "submitted" &&
         messages.length > 0 &&
         messages[messages.length - 1].role === "user" && <ThinkingMessage />} */}
-
-      <motion.div
-        ref={messagesEndRef}
-        className="shrink-0 min-w-[24px] min-h-[24px]"
-        onViewportLeave={onViewportLeave}
-        onViewportEnter={onViewportEnter}
-      />
     </div>
   );
 }
 
-export const Messages = memo(PureMessages, (prevProps, nextProps) => {
+const MessagesWithRef = forwardRef<MessagesHandle, MessagesProps>(PureMessages);
+
+export const Messages = memo(MessagesWithRef, (prevProps, nextProps) => {
   if (prevProps.isArtifactVisible && nextProps.isArtifactVisible) return true;
 
   if (prevProps.status !== nextProps.status) return false;
@@ -196,36 +222,6 @@ export const Messages = memo(PureMessages, (prevProps, nextProps) => {
   return true;
 });
 
-// <div className="flex items-center gap-2 h-full">
-// <Button
-//   variant="destructive"
-//   className="rounded-sm text-xs h-7"
-//   size="sm"
-//   onClick={() => {
-//     // setMessages([]);
-//     // setData([]);
-//     // setPricingModel(defaultPricingModel);
-//     // setInput("");
-//     // setAttachments([]);
-//     // setEditorText(JSON.stringify(defaultPricingModel, null, 2));
-
-//     localStorage.removeItem("chatMessages");
-//     localStorage.removeItem("pricingModel");
-//   }}
-// >
-//   <XIcon />
-//   Clear Chat
-// </Button>
-// <div className="border-l-1 border-zinc-200 p-0 h-full">
-//   <Button variant="add" className="rounded-none !h-full">
-//     <Image
-//       src="/logo.png"
-//       alt="Autumn Logo"
-//       width={25}
-//       height={25}
-//       className="-translate-y-0.5"
-//     />
-//     <span className="font-bold font-mono">Deploy to Autumn</span>
-//   </Button>
-// </div>
-// </div>
+export interface MessagesHandle {
+  scrollToBottom: (behavior?: ScrollBehavior) => void;
+}

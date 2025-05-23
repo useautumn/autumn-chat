@@ -66,7 +66,7 @@ export const getIncludedFeatureName = ({
 
 export const getPriceText = ({ item }: { item: ProductItem }) => {
   const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat(undefined, {
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 0,

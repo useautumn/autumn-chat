@@ -46,7 +46,7 @@ export const AnimatedGradientBorderTW: React.FC<{
       }
       className="rounded-sm flex items-center justify-center border-2 border-[#0000] 
       [background:padding-box_var(--bg-color),border-box_var(--border-color)]
-      w-full h-fit
+      w-full h-fit mt-4
       "
     >
       {children}

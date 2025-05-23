@@ -3,9 +3,9 @@
 import { useChat } from "@ai-sdk/react";
 import { Loader2, XIcon } from "lucide-react";
 import { cn, notNullish } from "@/lib/utils";
-import { Messages } from "@/components/messages";
+import { Messages, type MessagesHandle } from "@/components/messages";
 import { MultimodalInput } from "@/components/multimodal-input";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Attachment } from "ai";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import {
@@ -22,10 +22,13 @@ import { PricingModel } from "@/components/pricing-model/pricing-model";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 
 // Refer to https://ai-sdk.dev/docs/ai-sdk-ui/chatbot
 
 export default function Chat() {
+  const messagesRef = useRef<MessagesHandle | null>(null);
+
   const {
     messages,
     setMessages,
@@ -49,39 +52,47 @@ export default function Chat() {
   });
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
+  const [tab, setTab] = useState("pricing");
+  const [editorText, setEditorText] = useState("");
+  const [jsonError, setJsonError] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   const chatId = "1";
   const defaultPricingModel: z.infer<typeof PricingModelSchema> = {
     features: [],
     products: [],
   };
-  const [pricingModel, setPricingModel] = useState<
-    z.infer<typeof PricingModelSchema>
-  >(() => {
-    // Try to load from localStorage on initial render
+
+  const [pricingModel, setPricingModel] =
+    useState<z.infer<typeof PricingModelSchema>>(defaultPricingModel);
+
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const savedModel = localStorage.getItem("pricingModel");
-      return savedModel ? JSON.parse(savedModel) : defaultPricingModel;
+      if (savedModel) {
+        try {
+          const parsedModel = JSON.parse(savedModel);
+          setPricingModel(parsedModel);
+        } catch (error) {
+          console.error("Failed to parse saved pricing model:", error);
+        }
+      }
     }
-    return defaultPricingModel;
-  });
+  }, []);
 
-  // Save pricingModel to localStorage whenever it changes
-  useEffect(() => {
-    if (typeof window !== "undefined" && status === "ready") {
-      localStorage.setItem("pricingModel", JSON.stringify(pricingModel));
-    }
-  }, [pricingModel, status]);
+  const { isAtBottom, scrollToBottom } = useScrollToBottom();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedMessages = localStorage.getItem("chatMessages");
-      console.log("savedMessages", savedMessages);
       if (savedMessages) {
         setMessages(JSON.parse(savedMessages));
+        setTimeout(() => {
+          scrollToBottom("smooth");
+        }, 500);
       }
     }
-  }, [setMessages]);
+  }, [setMessages, scrollToBottom]);
 
   useEffect(() => {
     if (
@@ -93,9 +104,24 @@ export default function Chat() {
     }
   }, [messages, status]);
 
-  const [editorText, setEditorText] = useState(
-    JSON.stringify(pricingModel, null, 2)
-  );
+  // Save pricingModel to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== "undefined" && status === "ready") {
+      localStorage.setItem("pricingModel", JSON.stringify(pricingModel));
+      setEditorText(JSON.stringify(pricingModel, null, 2));
+    }
+  }, [pricingModel, status]);
+
+  useEffect(() => {
+    if (status === "ready" && data && data.length > 0) {
+      const latestPricingModel = data[data.length - 1] as z.infer<
+        typeof PricingModelSchema
+      >;
+      setEditorText(JSON.stringify(latestPricingModel, null, 2));
+      setPricingModel(latestPricingModel);
+      setData([]);
+    }
+  }, [status, data, setData]);
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -199,22 +225,6 @@ export default function Chat() {
   }, [data]);
 
   useEffect(() => {
-    if (status === "ready" && data && data.length > 0) {
-      const latestPricingModel = data[data.length - 1] as z.infer<
-        typeof PricingModelSchema
-      >;
-      setEditorText(JSON.stringify(latestPricingModel, null, 2));
-      setPricingModel(latestPricingModel);
-      setData([]);
-    }
-  }, [status, data, setData]);
-
-  const [tab, setTab] = useState("pricing");
-  const [jsonError, setJsonError] = useState(false);
-  // bg-[#FAFAFA]
-  const [showChat, setShowChat] = useState(false);
-
-  useEffect(() => {
     if (messages.length > 0) {
       setShowChat(true);
     }
@@ -259,6 +269,7 @@ export default function Chat() {
               setJsonError={setJsonError}
               showChat={showChat}
               setShowChat={setShowChat}
+              ref={messagesRef}
             />
             {/* <form className="flex py-4 px-0.5  mb-6 gap-2 w-full md:max-w-3xl"> */}
             <div className="max-w-[600px]">
@@ -295,55 +306,4 @@ export default function Chat() {
       </div>
     </div>
   );
-}
-
-{
-  /* <div className="bg-[#F5F5F5] min-h-12 flex justify-between border-b border-stone-200 items-center">
-        <div className="flex items-center gap-2 h-full py-0">
-          <Tabs
-            className="h-full border-r-1 border-zinc-200"
-            defaultValue="pricing"
-            onValueChange={(value) => setTab(value)}
-          >
-            <TabsList className="rounded-none h-full">
-              <TabsTrigger value="pricing">pricing_table</TabsTrigger>
-              <TabsTrigger value="code">config_file</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
-        <div className="flex items-center gap-2 h-full">
-          <Button
-            variant="destructive"
-            className="rounded-sm text-xs h-7"
-            size="sm"
-            onClick={() => {
-              setMessages([]);
-              setData([]);
-              setPricingModel(defaultPricingModel);
-              setInput("");
-              setAttachments([]);
-              setEditorText(JSON.stringify(defaultPricingModel, null, 2));
-
-              localStorage.removeItem("chatMessages");
-              localStorage.removeItem("pricingModel");
-            }}
-          >
-            <XIcon />
-            Clear Chat
-          </Button>
-          <div className="border-l-1 border-zinc-200 p-0 h-full">
-            <Button variant="add" className="rounded-none !h-full">
-              <Image
-                src="/logo.png"
-                alt="Autumn Logo"
-                width={25}
-                height={25}
-                className="-translate-y-0.5"
-              />
-              <span className="font-bold font-mono">Deploy to Autumn</span>
-            </Button>
-          </div>
-        </div>
-      </div> */
 }

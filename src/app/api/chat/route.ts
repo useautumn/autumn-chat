@@ -2,12 +2,8 @@ import { PricingModelSchema } from "@/models";
 import { explanationOfProducts } from "@/prompts/prompts";
 import { explanationOfFeatures } from "@/prompts/prompts";
 import { openai } from "@ai-sdk/openai";
-import {
-  streamObject,
-  streamText,
-  createDataStreamResponse,
-  smoothStream,
-} from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
+import { streamObject, streamText, createDataStreamResponse } from "ai";
 
 export const maxDuration = 30;
 
@@ -58,6 +54,7 @@ You should roughly guide the user through the following steps:
 
 <ADDITIONAL_INSTRUCTIONS>
 - Be extremely concise and straight to the point.
+- Keep your questions short and sweet. Maximum one sentence per question.
 - When asking for something, keep it short and sweet, don't be verbose.
 - Use the explanation of features and products to help you understand what the user is trying to achieve.
 - DO not just add field names from the PRICING_MODEL schema. It should be as if the user is talking to a person, not a bot.
@@ -72,13 +69,14 @@ export async function POST(req: Request) {
     execute: async (dataStream) => {
       const { fullStream } = streamObject({
         model: openai("gpt-4o"),
+        // model: anthropic("claude-4-sonnet-20250514"),
+        // model: anthropic("claude-3-5-sonnet-latest"),
         system: modellerSystemPrompt,
         messages: [
           ...messages,
           {
             role: "user",
             content: `Latest pricing model: ${JSON.stringify(pricingModel)}`,
-            // content: `I'm currently styling the chat bot. Generate minimal content (like empty product)`,
           },
         ],
         schema: PricingModelSchema,
