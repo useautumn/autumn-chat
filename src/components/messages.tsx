@@ -1,7 +1,7 @@
 import type { UIMessage } from "ai";
 import { PreviewMessage, ThinkingMessage } from "./message";
 // import { Greeting } from './greeting';
-import { memo, forwardRef, useImperativeHandle } from "react";
+import { memo, forwardRef, useImperativeHandle, useState } from "react";
 // import type { Vote } from '@/lib/db/schema';
 import equal from "fast-deep-equal";
 import type { UseChatHelpers } from "@ai-sdk/react";
@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import { useMessages } from "@/hooks/use-messages";
 import { Greeting } from "./greeting";
 import { Button } from "./ui/button";
-import { XIcon } from "lucide-react";
+import { Loader2, XIcon } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import Image from "next/image";
 import { CodeEditor } from "./pricing-model/code-editor2";
@@ -71,7 +71,6 @@ function PureMessages(
     messages,
   });
 
-  // Expose scrollToBottom function to parent component
   useImperativeHandle(
     ref,
     () => ({
@@ -79,6 +78,8 @@ function PureMessages(
     }),
     [scrollToBottom]
   );
+
+  const [loading, setLoading] = useState(false);
 
   return (
     <div
@@ -113,31 +114,47 @@ function PureMessages(
               <TabsTrigger value="code">config.ts</TabsTrigger>
             </TabsList>
           </Tabs>
-          <div className="border-l-1 border-zinc-200 p-0 h-full">
+          <div className="border-l-1 border-zinc-200 p-0 h-full w-full">
             <Button
               variant="add"
-              className="rounded-none !h-full"
+              className="rounded-none !h-full w-full cursor-pointer"
               onClick={async () => {
                 console.log(pricingModel);
-                const response = await fetch("/api/submit", {
-                  method: "POST",
-                  body: JSON.stringify({ pricingModel }),
-                });
+                try {
+                  setLoading(true);
+                  const response = await fetch("/api/submit", {
+                    method: "POST",
+                    body: JSON.stringify({ pricingModel }),
+                  });
 
-                const data = await response.json();
-                window.open(
-                  `https://accounts.useautumn.com/sign-in?redirect_url=https://app.useautumn.com/sandbox/onboarding?token=${data.id}`,
-                  "_blank"
-                );
+                  const data = await response.json();
+                  const baseURL =
+                    "https://app.useautumn.com/sandbox/onboarding";
+                  const authUrl = "https://accounts.useautumn.com/sign-in";
+                  // const baseURL = "http://localhost:3000/sandbox/onboarding";
+                  // const authUrl =
+                  //   "https://massive-ghoul-59.accounts.dev/sign-in";
+                  window.open(
+                    `${authUrl}?redirect_url=${baseURL}?token=${data.id}`,
+                    "_blank"
+                  );
+                } catch (error) {
+                } finally {
+                  setLoading(false);
+                }
               }}
             >
-              <Image
-                src="/logo.png"
-                alt="Autumn Logo"
-                width={20}
-                height={20}
-                className="-translate-y-0.5"
-              />
+              {loading ? (
+                <Loader2 className="animate-spin" width={20} />
+              ) : (
+                <Image
+                  src="/logo.png"
+                  alt="Autumn Logo"
+                  width={20}
+                  height={20}
+                  className="-translate-y-0.5"
+                />
+              )}
               <span className="font-bold font-mono">Deploy to Autumn</span>
             </Button>
           </div>

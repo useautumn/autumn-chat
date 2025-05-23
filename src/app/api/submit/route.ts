@@ -14,7 +14,7 @@ import KSUID from "ksuid";
 export const POST = async (req: NextRequest) => {
   try {
     const { pricingModel } = await req.json();
-    console.log(pricingModel);
+
     const id = KSUID.randomSync().string;
 
     try {
