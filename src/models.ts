@@ -35,6 +35,7 @@ export const ProductSchema = z.object({
   id: z.string().nonempty(),
   name: z.string().nonempty(),
   is_add_on: z.boolean().default(false),
+  is_default: z.boolean().default(false),
   items: z.array(ProductItemSchema),
 });
 
