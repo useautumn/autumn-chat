@@ -1,7 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 const client = postgres(process.env.DATABASE_URL!);
-export const db = drizzle({ client });
 
 import { config } from "dotenv";
 config({ path: ".env" }); // or .env.local
@@ -11,6 +10,7 @@ import { chatResults } from "@/lib/db/schema";
 
 import KSUID from "ksuid";
 
+const db = drizzle({ client });
 export const POST = async (req: NextRequest) => {
   try {
     const { pricingModel } = await req.json();
@@ -18,7 +18,7 @@ export const POST = async (req: NextRequest) => {
     const id = KSUID.randomSync().string;
 
     try {
-      let result = await db
+      const result = await db
         .insert(chatResults)
         .values({
           id,
