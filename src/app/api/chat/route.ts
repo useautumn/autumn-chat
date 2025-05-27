@@ -31,6 +31,8 @@ You will then update the PRICING_MODEL based on the updated list of messages fro
 - If single use features are charged, the interval usually follows the billing interval unless the user specifies otherwise.
 - Do not generate ANY products (such as template or skeleton products) unless specified by the user
 - Ignore instructions related to free trials as it is not available yet through this chat.
+- A feature should only appear once in the product items
+- Do not delete any products unless the user specifically asks you to.
 </ADDITIONAL_INSTRUCTIONS>
 `;
 
