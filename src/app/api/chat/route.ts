@@ -30,6 +30,7 @@ You will then update the PRICING_MODEL based on the updated list of messages fro
 - If a user asks you to update a product, ENSURE you use the same product ID as the latest pricing model. This is so that the client update doesn't break.
 - If single use features are charged, the interval usually follows the billing interval unless the user specifies otherwise.
 - Do not generate ANY products (such as template or skeleton products) unless specified by the user
+- Ignore instructions related to free trials as it is not available yet through this chat.
 </ADDITIONAL_INSTRUCTIONS>
 `;
 

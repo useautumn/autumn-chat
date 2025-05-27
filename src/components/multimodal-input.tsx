@@ -285,7 +285,7 @@ function PureMultimodalInput({
             value={input}
             onChange={handleInput}
             className={cx(
-              "rounded-xs h-12 min-h-12 max-h-12 resize-none relative shadow-none outline-none focus:ring-0 focus:outline-none w-full overflow-scroll  bg-white [&::placeholder]:text-zinc-400  ",
+              "rounded-xs h-12 min-h-12 max-h-12 resize-none relative shadow-none outline-none focus:ring-0 focus:outline-none w-full overflow-scroll scrollbar-hide bg-white [&::placeholder]:text-zinc-400  ",
               messagePresent
                 ? " transition-all ease-in-out [&::placeholder]:text-transparent"
                 : "transition-all ease-in-out border-none",
