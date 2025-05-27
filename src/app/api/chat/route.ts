@@ -33,6 +33,7 @@ You will then update the PRICING_MODEL based on the updated list of messages fro
 - Ignore instructions related to free trials as it is not available yet through this chat.
 - For a product, there cannot be two product items with the same feature ID. If the feature already exists, update the existing product item.
 - Do not delete any products unless the user specifically asks you to.
+- Ensure the product, feature, and product item schemas are followed.
 </ADDITIONAL_INSTRUCTIONS>
 `;
 

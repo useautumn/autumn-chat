@@ -21,7 +21,7 @@ export enum UsageModel {
 
 export const ProductItemSchema = z.object({
   // Feature stuff
-  feature_id: z.string().min(1).nullish(),
+  feature_id: z.string().nullish(),
   included_usage: z.union([z.number(), z.literal("inf")]).nullish(),
   interval: z.nativeEnum(ProductItemInterval).nullish(),
 
@@ -32,12 +32,9 @@ export const ProductItemSchema = z.object({
 });
 
 export const ProductSchema = z.object({
-  internal_id: z.string().nullish(),
-
-  id: z.string(),
-  name: z.string(),
-  is_add_on: z.boolean(),
-  // is_default: z.boolean(),
+  id: z.string().nonempty(),
+  name: z.string().nonempty(),
+  is_add_on: z.boolean().default(false),
   items: z.array(ProductItemSchema),
 });
 

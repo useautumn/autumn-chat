@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { chatResults } from "@/lib/db/schema";
 
 import KSUID from "ksuid";
-import { Feature, FeatureSchema } from "@/models";
+import { Feature, FeatureSchema, Product, ProductSchema } from "@/models";
 
 const db = drizzle({ client });
 export const POST = async (req: NextRequest) => {
@@ -23,6 +23,13 @@ export const POST = async (req: NextRequest) => {
       } catch (error) {}
     }
 
+    const parsedProducts: Product[] = [];
+    for (const product of pricingModel.products) {
+      try {
+        parsedProducts.push(ProductSchema.parse(product));
+      } catch (error) {}
+    }
+
     const id = KSUID.randomSync().string;
 
     try {
@@ -33,6 +40,7 @@ export const POST = async (req: NextRequest) => {
           data: {
             ...pricingModel,
             features: parsedFeatures,
+            products: parsedProducts,
           },
           created_at: Date.now(),
         })
