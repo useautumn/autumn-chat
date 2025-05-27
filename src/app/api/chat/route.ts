@@ -75,9 +75,9 @@ export async function POST(req: Request) {
   return createDataStreamResponse({
     execute: async (dataStream) => {
       const { fullStream } = streamObject({
-        model: openai("gpt-4o"),
+        // model: openai("gpt-4o"),
         // model: anthropic("claude-4-sonnet-20250514"),
-        // model: anthropic("claude-3-5-sonnet-latest"),
+        model: anthropic("claude-3-5-sonnet-latest"),
         system: modellerSystemPrompt,
         messages: [
           ...messages,
