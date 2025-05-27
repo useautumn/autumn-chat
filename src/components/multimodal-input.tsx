@@ -24,7 +24,15 @@ import { Textarea } from "./ui/textarea";
 import equal from "fast-deep-equal";
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowDown, ArrowUpIcon, XIcon } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUpIcon,
+  Code2,
+  Loader2,
+  MessageSquare,
+  Rocket,
+  XIcon,
+} from "lucide-react";
 import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { AnimatedGradientBorderTW } from "./animated-border-gradient";
 import { cn } from "@/lib/utils";
@@ -44,6 +52,10 @@ function PureMultimodalInput({
   handleSubmit,
   className,
   clearChat,
+  showConfig,
+  setShowConfig,
+  pricingModel,
+  setPricingModel,
 }: {
   chatId: string;
   input: UseChatHelpers["input"];
@@ -58,9 +70,14 @@ function PureMultimodalInput({
   handleSubmit: UseChatHelpers["handleSubmit"];
   className?: string;
   clearChat: () => void;
+  showConfig: boolean;
+  setShowConfig: (showConfig: boolean) => void;
+  pricingModel: any;
+  setPricingModel: (pricingModel: any) => void;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
+  const [loading, setLoading] = useState(false);
 
   const [messagePresent, setMessagePresent] = useState(messages.length > 0);
 
@@ -257,41 +274,44 @@ function PureMultimodalInput({
       )}
 
       {/* <div className="animated-gradient-border !rounded-none"> */}
-      <AnimatedGradientBorderTW animate={!messagePresent}>
-        <Textarea
-          // data-testid="multimodal-input"
-          ref={textareaRef}
-          placeholder="Describe your pricing, we'll build it for you"
-          value={input}
-          onChange={handleInput}
-          className={cx(
-            "rounded-sm shadow-none outline-none focus:ring-0 focus:outline-none resize-none w-full overflow-hidden",
-            messagePresent
-              ? "min-h-[100px] transition-all ease-in-out pb-[40px] border-2 border-gray-200 mt-4 bg-zinc-50"
-              : "min-h-[60px] transition-all ease-in-out border-none",
-            className
-          )}
-          rows={2}
-          autoFocus
-          onKeyDown={(event) => {
-            if (
-              event.key === "Enter" &&
-              !event.shiftKey &&
-              !event.nativeEvent.isComposing
-            ) {
-              event.preventDefault();
+      {/* <AnimatedGradientBorderTW animate={!messagePresent}> */}
+      <div className={cn("flex items-center", messagePresent ? "mt-4" : "")}>
+        <div className="group relative mx-auto w-full overflow-hidden rounded-xs bg-gray-300 p-[1px] transition-all duration-300 ease-in-out bg-gradient-to-b from-primary/70 to-primary shadow-md">
+          <div className="animate-spin-slow absolute -top-90 -bottom-90 left-10 right-10 bg-gradient-to-r from-transparent via-white/90 to-transparent visible"></div>
+          <Textarea
+            // data-testid="multimodal-input"
+            ref={textareaRef}
+            placeholder="Describe your app's pricing..."
+            value={input}
+            onChange={handleInput}
+            className={cx(
+              "rounded-xs h-12 min-h-12 max-h-12 resize-none relative shadow-none outline-none focus:ring-0 focus:outline-none w-full overflow-scroll  bg-white [&::placeholder]:text-zinc-400  ",
+              messagePresent
+                ? " transition-all ease-in-out [&::placeholder]:text-transparent"
+                : "transition-all ease-in-out border-none",
+              className
+            )}
+            rows={2}
+            autoFocus
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.nativeEvent.isComposing
+              ) {
+                event.preventDefault();
 
-              if (status !== "ready") {
-                toast.error(
-                  "Please wait for the model to finish its response!"
-                );
-              } else {
-                submitForm();
+                if (status !== "ready") {
+                  toast.error("Please wait for Autumn to finish its response");
+                } else {
+                  submitForm();
+                }
               }
-            }
-          }}
-        />
-      </AnimatedGradientBorderTW>
+            }}
+          />
+        </div>
+      </div>
+      {/* </AnimatedGradientBorderTW> */}
       {/* </div> */}
 
       {/* <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start">
@@ -303,14 +323,35 @@ function PureMultimodalInput({
 
       <div
         className={cn(
-          "absolute bottom-0 right-0 p-2 pt-0 w-full flex flex-row justify-between gap-2",
+          "bottom-0 right-0 p-2 pt-0 w-full flex flex-row justify-between gap-2",
           messagePresent ? "opacity-100 " : "opacity-0 pointer-events-none"
         )}
       >
-        <div className="flex flex-row gap-2">
+        <Button
+          variant="outline"
+          className="rounded-xs text-xs hover:bg-zinc-100 shadow-none text-zinc-400"
+          size="sm"
+          onClick={() => {
+            setShowConfig(!showConfig);
+          }}
+        >
+          {showConfig ? (
+            <>
+              <MessageSquare size={10} className="mr-1 " />
+              Chat
+            </>
+          ) : (
+            <>
+              <Code2 size={10} className="mr-1" />
+              Config
+            </>
+          )}
+        </Button>
+
+        <div className="flex gap-2">
           <Button
             variant="destructive"
-            className="rounded-sm text-xs hover:bg-red-500/90 hover:text-zinc-50 shadow-none"
+            className="rounded-xs text-xs hover:bg-red-500/90 hover:text-zinc-50 shadow-none bg-white"
             size="sm"
             onClick={() => {
               clearChat();
@@ -320,17 +361,53 @@ function PureMultimodalInput({
             <XIcon size={10} />
             Clear
           </Button>
-        </div>
 
-        {status === "submitted" ? (
-          <StopButton stop={stop} setMessages={setMessages} />
-        ) : (
-          <SendButton
-            input={input}
-            submitForm={submitForm}
-            uploadQueue={uploadQueue}
-          />
-        )}
+          {/* {status === "submitted" ? (
+            <StopButton stop={stop} setMessages={setMessages} />
+                    ) : (
+            <SendButton
+              input={input}
+              submitForm={submitForm}
+              uploadQueue={uploadQueue}
+            />
+                    )} */}
+          <Button
+            variant="default"
+            className="rounded-xs text-xs hover:bg-purple-800/90 hover:text-zinc-50 shadow-none"
+            size="sm"
+            onClick={async () => {
+              console.log(pricingModel);
+              try {
+                setLoading(true);
+                const response = await fetch("/api/submit", {
+                  method: "POST",
+                  body: JSON.stringify({ pricingModel }),
+                });
+
+                const data = await response.json();
+                const baseURL = "https://app.useautumn.com/sandbox/onboarding";
+                const authUrl = "https://accounts.useautumn.com/sign-in";
+                // const baseURL = "http://localhost:3000/sandbox/onboarding";
+                // const authUrl =
+                //   "https://massive-ghoul-59.accounts.dev/sign-in";
+                window.open(
+                  `${authUrl}?redirect_url=${baseURL}?token=${data.id}`,
+                  "_blank"
+                );
+              } catch (error) {
+              } finally {
+                setLoading(false);
+              }
+            }}
+          >
+            {loading ? (
+              <Loader2 className="animate-spin" width={10} />
+            ) : (
+              <Rocket size={10} />
+            )}
+            Deploy
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -343,6 +420,8 @@ export const MultimodalInput = memo(
     if (prevProps.status !== nextProps.status) return false;
     if (!equal(prevProps.attachments, nextProps.attachments)) return false;
     if (!equal(prevProps.messages, nextProps.messages)) return false;
+    if (prevProps.showConfig !== nextProps.showConfig) return false;
+    if (prevProps.setShowConfig !== nextProps.setShowConfig) return false;
     // if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType)
     //   return false;
 

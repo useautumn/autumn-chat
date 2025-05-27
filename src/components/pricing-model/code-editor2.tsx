@@ -20,7 +20,7 @@ export const CodeEditor = ({
   error: boolean;
 }) => {
   return (
-    <div className="flex flex-col h-full w-full relative rounded-md">
+    <div className="flex flex-col h-full w-full relative rounded-sm bg-white border">
       {error && (
         <div
           className="bg-red-400 border border-red-500 text-xs text-white w-fit absolute z-100 top-2 right-5 px-2 py-1

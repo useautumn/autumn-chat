@@ -179,3 +179,7 @@ body {
   /* Contain overflow behavior */
   overscroll-behavior-y: contain;
 }
+
+@theme {
+  --animate-spin-slow: spin 5s linear infinite;
+}

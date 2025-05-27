@@ -40,11 +40,11 @@ export const AnimatedGradientBorderTW: React.FC<{
       style={
         {
           "--angle": "0deg",
-          "--border-color": "linear-gradient(var(--angle), #bfc1c6, #f8f9fa)",
-          "--bg-color": "linear-gradient(#f8f9fa, #fff)",
+          "--border-color": "linear-gradient(var(--angle), #8838ff, #f8f9fa)",
+          "--bg-color": "linear-gradient(#fff, #fff)",
         } as CSSProperties
       }
-      className="rounded-sm flex items-center justify-center border-2 border-[#0000] 
+      className="rounded-xs flex items-center justify-center border-2 border-[#0000] 
       [background:padding-box_var(--bg-color),border-box_var(--border-color)]
       w-full h-fit mt-4
       "

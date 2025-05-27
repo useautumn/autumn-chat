@@ -42,7 +42,7 @@ const PurePreviewMessage = ({
     <AnimatePresence>
       <motion.div
         data-testid={`message-${message.role}`}
-        className="w-full mx-auto max-w-3xl px-4 group/message"
+        className="w-full mx-auto max-w-3xl group/message"
         initial={{ y: 5, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         data-role={message.role}
@@ -57,7 +57,7 @@ const PurePreviewMessage = ({
           )}
         >
           {message.role === "assistant" && (
-            <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border bg-background">
+            <div className="size-8 flex items-center rounded-full justify-center shrink-0 text-primary">
               <div className="translate-y-px">
                 <SparklesIcon size={14} />
               </div>
@@ -102,8 +102,9 @@ const PurePreviewMessage = ({
                         data-testid="message-content"
                         className={cn(
                           "flex flex-col gap-4",
-                          message.role === "user" &&
-                            "bg-tertiary text-secondary-foreground/90 px-3 py-1 rounded-lg"
+                          message.role === "user"
+                            ? "bg-stone-100 border shadow-sm text-secondary-foreground/90 px-3 py-1 rounded-xs"
+                            : "bg-white border shadow-sm text-secondary-foreground/90 px-3 py-1 rounded-xs"
                         )}
                       >
                         <Markdown>{sanitizeText(part.text)}</Markdown>
@@ -153,7 +154,7 @@ export const ThinkingMessage = () => {
           }
         )}
       >
-        <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border">
+        <div className="size-8 flex items-center rounded-full justify-center shrink-0">
           <SparklesIcon size={14} />
         </div>
 

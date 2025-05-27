@@ -34,6 +34,8 @@ interface MessagesProps {
   setJsonError: (jsonError: boolean) => void;
   showChat: boolean;
   setShowChat: (showChat: boolean) => void;
+  showConfig: boolean;
+  setShowConfig: (showConfig: boolean) => void;
 }
 
 function PureMessages(
@@ -55,6 +57,8 @@ function PureMessages(
     setJsonError,
     showChat,
     setShowChat,
+    showConfig,
+    setShowConfig,
   }: MessagesProps,
   ref: React.Ref<MessagesHandle>
 ) {
@@ -84,10 +88,9 @@ function PureMessages(
   return (
     <div
       className={cn(
-        "max-h-[500px] min-h-[500px] rounded-md flex flex-col",
-        "bg-white/0 transition-opacity rounded-sm",
+        "max-h-[480px] min-h-[480px] flex flex-col bg-white/0 transition-opacity rounded-xs justify-end",
         messages.length > 0
-          ? "duration-1000 bg-white/100 shadow-md scale-100 opacity-100 translate-y-0"
+          ? "duration-1000 scale-100 opacity-100 translate-y-0"
           : "duration-500 bg-white/0 scale-95 opacity-0 -translate-y-4"
       )}
       style={{
@@ -95,9 +98,9 @@ function PureMessages(
         overscrollBehavior: "contain",
       }}
     >
-      <div
+      {/* <div
         className={cn(
-          "bg-[#F5F5F5] min-h-10 transition-all",
+          " min-h-10 transition-all",
           messages.length > 0
             ? "duration-1000 opacity-100"
             : "duration-500 opacity-0"
@@ -159,61 +162,61 @@ function PureMessages(
             </Button>
           </div>
         </div>
-      </div>
+      </div>   */}
 
       {/* {messages.length === 0 && <Greeting />} */}
 
-      {tab === "code" && (
-        <CodeEditor
-          customConfig={editorText}
-          handleConfigChange={(value) => {
-            setEditorText(value);
-            try {
-              const parsed = JSON.parse(value);
-              setPricingModel(parsed);
-              setJsonError(false);
-            } catch (error) {
-              setJsonError(true);
-            }
-          }}
-          error={jsonError}
-        />
-      )}
-      <div
-        className="flex flex-col gap-6 flex-1 overflow-y-auto relative scrollbar-hide"
-        ref={tab == "pricing" ? messagesContainerRef : undefined}
-        style={{
-          contain: "layout style paint",
-          overscrollBehavior: "contain",
-          touchAction: "pan-y",
-        }}
-      >
-        {tab === "pricing" && (
-          <div className="pt-4 flex flex-col gap-6">
-            {messages.map((message, index) => (
-              <PreviewMessage
-                key={message.id}
-                chatId={chatId}
-                message={message}
-                isLoading={
-                  status === "streaming" && messages.length - 1 === index
-                }
-                vote={undefined}
-                setMessages={setMessages}
-                reload={reload}
-                isReadonly={isReadonly}
-                requiresScrollPadding={
-                  hasSentMessage && index === messages.length - 1
-                }
+      <div className="flex max-h-[400px] px-2">
+        {showConfig ? (
+          <CodeEditor
+            customConfig={editorText}
+            handleConfigChange={(value) => {
+              setEditorText(value);
+              try {
+                const parsed = JSON.parse(value);
+                setPricingModel(parsed);
+                setJsonError(false);
+              } catch (error) {
+                setJsonError(true);
+              }
+            }}
+            error={jsonError}
+          />
+        ) : (
+          <div
+            className="flex flex-col gap-6 overflow-y-auto relative scrollbar-hide w-full"
+            ref={tab == "pricing" ? messagesContainerRef : undefined}
+            style={{
+              contain: "layout style paint",
+              overscrollBehavior: "contain",
+              touchAction: "pan-y",
+            }}
+          >
+            <div className="pt-4 flex flex-col h-fit gap-6">
+              {messages.map((message, index) => (
+                <PreviewMessage
+                  key={message.id}
+                  chatId={chatId}
+                  message={message}
+                  isLoading={
+                    status === "streaming" && messages.length - 1 === index
+                  }
+                  vote={undefined}
+                  setMessages={setMessages}
+                  reload={reload}
+                  isReadonly={isReadonly}
+                  requiresScrollPadding={
+                    hasSentMessage && index === messages.length - 1
+                  }
+                />
+              ))}
+              <motion.div
+                ref={messagesEndRef}
+                className="shrink-0 min-w-[24px] min-h-[12px] -mt-8"
+                onViewportLeave={onViewportLeave}
+                onViewportEnter={onViewportEnter}
               />
-            ))}
-
-            <motion.div
-              ref={messagesEndRef}
-              className="shrink-0 min-w-[24px] min-h-[24px]"
-              onViewportLeave={onViewportLeave}
-              onViewportEnter={onViewportEnter}
-            />
+            </div>
           </div>
         )}
       </div>

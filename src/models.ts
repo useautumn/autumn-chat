@@ -62,8 +62,8 @@ export const FeatureSchema = z.object({
 });
 
 export const PricingModelSchema = z.object({
-  features: z.array(FeatureSchema),
   products: z.array(ProductSchema),
+  features: z.array(FeatureSchema),
 });
 
 export type ProductItem = z.infer<typeof ProductItemSchema>;

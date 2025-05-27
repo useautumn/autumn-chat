@@ -144,7 +144,7 @@ export const PricingCard = ({
   return (
     <div
       className={cn(
-        "border rounded-md bg-background w-full h-full pt-6 text-foreground",
+        "border rounded-xs shadow-md bg-background w-full h-full pt-6 text-foreground",
         recommendedText &&
           !uniform &&
           "shadow-xl border-primary/30 lg:-translate-y-6 lg:h-[calc(100%+48px)] relative",
@@ -260,7 +260,7 @@ export const PricingCardButton = React.forwardRef<
   return (
     <Button
       className={cn(
-        "w-full py-3 px-4 rounded-md group overflow-hidden relative transition-all duration-300 hover:brightness-90",
+        "w-full py-3 px-4 rounded-xs group overflow-hidden relative transition-all duration-300 hover:brightness-90",
         className
       )}
       variant={recommended ? "default" : "secondary"}

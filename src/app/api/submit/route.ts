@@ -18,13 +18,17 @@ export const POST = async (req: NextRequest) => {
     const id = KSUID.randomSync().string;
 
     try {
-      await db.insert(chatResults).values({
-        id,
-        data: pricingModel,
-        created_at: Date.now(),
-      });
+      let result = await db
+        .insert(chatResults)
+        .values({
+          id,
+          data: pricingModel,
+          created_at: Date.now(),
+        })
+        .returning();
+      console.log(result);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to submit chat result!", error);
     }
 
     return NextResponse.json({ id });

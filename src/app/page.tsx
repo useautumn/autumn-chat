@@ -56,11 +56,13 @@ export default function Chat() {
   const [editorText, setEditorText] = useState("");
   const [jsonError, setJsonError] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showConfig, setShowConfig] = useState(false);
+  console.log("showConfig", showConfig);
 
   const chatId = "1";
   const defaultPricingModel: z.infer<typeof PricingModelSchema> = {
-    features: [],
     products: [],
+    features: [],
   };
 
   const [pricingModel, setPricingModel] =
@@ -243,36 +245,46 @@ export default function Chat() {
 
   return (
     <div className={cn("relative w-full h-fit flex flex-col")}>
-      <div className="flex flex-col h-full w-full justify-end pr-4 pointer-events-none p-2">
+      <div className="flex flex-col h-full w-full justify-end pointer-events-none p-2 px-0">
         <div className="flex w-full justify-end">
           <div
             className={cn(
-              "flex flex-col justify-end h-full pointer-events-auto transition-all duration-300 ease-in-out",
-              messages.length > 0 ? "w-[400px]" : "w-full"
+              "flex h-full pointer-events-auto transition-all duration-300 ease-in-out w-full",
+              messages.length > 0 ? "justify-end" : "justify-start"
             )}
           >
-            <Messages
-              chatId={chatId}
-              status={status}
-              messages={messages}
-              setMessages={setMessages}
-              reload={reload}
-              isReadonly={false}
-              isArtifactVisible={false}
-              tab={tab}
-              setTab={setTab}
-              editorText={editorText}
-              setEditorText={setEditorText}
-              pricingModel={pricingModel}
-              setPricingModel={setPricingModel}
-              jsonError={jsonError}
-              setJsonError={setJsonError}
-              showChat={showChat}
-              setShowChat={setShowChat}
-              ref={messagesRef}
-            />
-            {/* <form className="flex py-4 px-0.5  mb-6 gap-2 w-full md:max-w-3xl"> */}
-            <div className="max-w-[600px]">
+            <div
+              className={cn(
+                "flex flex-col transition-all duration-300",
+                messages.length > 0
+                  ? "max-w-[400px] w-full"
+                  : "max-w-[505px] w-full"
+              )}
+            >
+              <Messages
+                chatId={chatId}
+                status={status}
+                messages={messages}
+                setMessages={setMessages}
+                reload={reload}
+                isReadonly={false}
+                isArtifactVisible={false}
+                tab={tab}
+                setTab={setTab}
+                editorText={editorText}
+                setEditorText={setEditorText}
+                pricingModel={pricingModel}
+                setPricingModel={setPricingModel}
+                jsonError={jsonError}
+                setJsonError={setJsonError}
+                showChat={showChat}
+                setShowChat={setShowChat}
+                ref={messagesRef}
+                showConfig={showConfig}
+                setShowConfig={setShowConfig}
+              />
+              {/* <form className="flex py-4 px-0.5  mb-6 gap-2 w-full md:max-w-3xl"> */}
+
               <MultimodalInput
                 chatId={chatId}
                 input={input}
@@ -286,12 +298,16 @@ export default function Chat() {
                 setMessages={setMessages}
                 append={append}
                 clearChat={clearChat}
+                showConfig={showConfig}
+                setShowConfig={setShowConfig}
+                pricingModel={pricingModel}
+                setPricingModel={setPricingModel}
               />
             </div>
             {/* </form> */}
           </div>
         </div>
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto mt-12">
           <PricingModel
             pricingModel={pricingModel}
             setPricingModel={setPricingModel}
