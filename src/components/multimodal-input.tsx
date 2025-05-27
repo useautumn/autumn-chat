@@ -376,9 +376,6 @@ function PureMultimodalInput({
             className="rounded-xs text-xs hover:bg-purple-800/90 hover:text-zinc-50 shadow-none"
             size="sm"
             onClick={async () => {
-              console.log(pricingModel);
-              return;
-
               try {
                 setLoading(true);
                 const response = await fetch("/api/submit", {
@@ -386,7 +383,6 @@ function PureMultimodalInput({
                   body: JSON.stringify({ pricingModel }),
                 });
 
-                console.log(response);
                 setLoading(false);
 
                 const data = await response.json();
