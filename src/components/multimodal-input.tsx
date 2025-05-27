@@ -377,12 +377,17 @@ function PureMultimodalInput({
             size="sm"
             onClick={async () => {
               console.log(pricingModel);
+              return;
+
               try {
                 setLoading(true);
                 const response = await fetch("/api/submit", {
                   method: "POST",
                   body: JSON.stringify({ pricingModel }),
                 });
+
+                console.log(response);
+                setLoading(false);
 
                 const data = await response.json();
                 const baseURL = "https://app.useautumn.com/sandbox/onboarding";
@@ -422,6 +427,7 @@ export const MultimodalInput = memo(
     if (!equal(prevProps.messages, nextProps.messages)) return false;
     if (prevProps.showConfig !== nextProps.showConfig) return false;
     if (prevProps.setShowConfig !== nextProps.setShowConfig) return false;
+    if (!equal(prevProps.pricingModel, nextProps.pricingModel)) return false;
     // if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType)
     //   return false;
 

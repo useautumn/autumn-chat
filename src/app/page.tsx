@@ -57,7 +57,6 @@ export default function Chat() {
   const [jsonError, setJsonError] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  console.log("showConfig", showConfig);
 
   const chatId = "1";
   const defaultPricingModel: z.infer<typeof PricingModelSchema> = {
@@ -119,6 +118,7 @@ export default function Chat() {
       const latestPricingModel = data[data.length - 1] as z.infer<
         typeof PricingModelSchema
       >;
+      console.log("latestPricingModel", latestPricingModel);
       setEditorText(JSON.stringify(latestPricingModel, null, 2));
       setPricingModel(latestPricingModel);
       setData([]);
@@ -126,7 +126,7 @@ export default function Chat() {
   }, [status, data, setData]);
 
   useEffect(() => {
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && status !== "ready") {
       const newPricingModel = data[data.length - 1] as z.infer<
         typeof PricingModelSchema
       >;
@@ -140,6 +140,7 @@ export default function Chat() {
                 const newFeature = newPricingModel.features.find(
                   (f) => f.id === prevFeature.id
                 );
+
                 if (!newFeature) return prevFeature;
 
                 return {
@@ -224,7 +225,7 @@ export default function Chat() {
         });
       }
     }
-  }, [data]);
+  }, [data, status]);
 
   useEffect(() => {
     if (messages.length > 0) {
