@@ -57,7 +57,6 @@ export default function Chat() {
   const [jsonError, setJsonError] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  console.log("showConfig", showConfig);
 
   const chatId = "1";
   const defaultPricingModel: z.infer<typeof PricingModelSchema> = {
