@@ -23,13 +23,14 @@ You will then update the PRICING_MODEL based on the updated list of messages fro
 </INSTRUCTIONS>
 
 <ADDITIONAL_INSTRUCTIONS> 
-- Do not return any product item with no price AND no feature. Feature ID should always be defined
+- A product item must have either a price or a feature, or both. Ensure you follow the schema.
 - Annual and monthly price variants should be 2 separate products.
-- Products without a price should have is_default as true, unless the user specifies otherwise.
+- Products without a price item should have is_default as true, unless the user specifies otherwise.
 - Determine whether the product is an add-on, marked with is_add_on as true, such as if users can buy additional things separately to the base product.
 - If a user asks you to update a product, ENSURE you use the same product ID as the latest pricing model. This is so that the client update doesn't break.
-- If single use features are charged, the interval usually follows the billing interval unless the user specifies otherwise.
-- Do not generate ANY products (such as template or skeleton products) unless specified by the user
+- If single use features are charged, the interval usually follows the price interval unless the user specifies otherwise.
+- Do not generate ANY products (such as template or skeleton products) unless specified by the user. Do not delete any products unless the user asks you to.
+- For a product, there cannot be two product items with the same feature ID. If the feature already exists, update the existing product item.
 - Ignore the user instruction if the user asks about any of the following: 
   1. failed payments 
   2. referrals
@@ -77,7 +78,7 @@ You should roughly guide the user through the following steps:
   7. Other currencies
   8. Anything that doens't fit into the pricing schema
 
-  you should tell them you're unsure and ask them to contact us at hey@useautumn.com
+  you should tell them to set it up via Autumn dashboard, and ask them to contact us at hey@useautumn.com
 
 - Use the explanation of features and products to help you understand what the user is trying to achieve.
 - Do not just add field names from the PRICING_MODEL schema. It should be as if the user is talking to a person, not a bot.
@@ -91,9 +92,9 @@ export async function POST(req: Request) {
   return createDataStreamResponse({
     execute: async (dataStream) => {
       const { fullStream } = streamObject({
-        model: openai("gpt-4o"),
+        // model: openai("gpt-4o"),
         // model: anthropic("claude-4-sonnet-20250514"),
-        // model: anthropic("claude-3-5-sonnet-latest"),
+        model: anthropic("claude-3-5-sonnet-latest"),
         system: modellerSystemPrompt,
         messages: [
           ...messages,

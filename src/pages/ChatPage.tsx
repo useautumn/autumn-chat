@@ -253,54 +253,6 @@ export default function Chat({
 
   return (
     <div className={cn("relative w-full h-fit flex flex-col")}>
-      {/* <div className="bg-[#F5F5F5] min-h-12 flex justify-between border-b border-stone-200 items-center">
-        <div className="flex items-center gap-2 h-full py-0">
-          <Tabs
-            className="h-full border-r-1 border-zinc-200"
-            defaultValue="pricing"
-            onValueChange={(value) => setTab(value)}
-          >
-            <TabsList className="rounded-none h-full">
-              <TabsTrigger value="pricing">pricing_table</TabsTrigger>
-              <TabsTrigger value="code">config_file</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
-        <div className="flex items-center gap-2 h-full">
-          <Button
-            variant="destructive"
-            className="rounded-sm text-xs h-7"
-            size="sm"
-            onClick={() => {
-              setMessages([]);
-              setData([]);
-              setPricingModel(defaultPricingModel);
-              setInput("");
-              setAttachments([]);
-              setEditorText(JSON.stringify(defaultPricingModel, null, 2));
-
-              localStorage.removeItem("chatMessages");
-              localStorage.removeItem("pricingModel");
-            }}
-          >
-            <XIcon />
-            Clear Chat
-          </Button>
-          <div className="border-l-1 border-zinc-200 p-0 h-full">
-            <Button variant="add" className="rounded-none !h-full">
-              <Image
-                src="/logo.png"
-                alt="Autumn Logo"
-                width={25}
-                height={25}
-                className="-translate-y-0.5"
-              />
-              <span className="font-bold font-mono">Deploy to Autumn</span>
-            </Button>
-          </div>
-        </div>
-      </div> */}
       <div className="flex flex-col h-full w-full justify-end pr-4 pointer-events-none p-2">
         <div className="flex w-full justify-end">
           <div
@@ -327,6 +279,8 @@ export default function Chat({
               setJsonError={setJsonError}
               showChat={showChat}
               setShowChat={setShowChat}
+              showConfig={false}
+              setShowConfig={() => {}}
             />
             <form className="flex py-4 px-0.5  mb-6 gap-2 w-full md:max-w-3xl">
               <MultimodalInput
@@ -342,7 +296,10 @@ export default function Chat({
                 setMessages={setMessages}
                 append={append}
                 clearChat={clearChat}
-                setShowChat={setShowChat}
+                showConfig={false}
+                setShowConfig={() => {}}
+                pricingModel={pricingModel}
+                setPricingModel={setPricingModel}
               />
             </form>
           </div>

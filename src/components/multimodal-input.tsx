@@ -285,7 +285,7 @@ function PureMultimodalInput({
             value={input}
             onChange={handleInput}
             className={cx(
-              "rounded-xs h-12 min-h-12 max-h-12 resize-none relative shadow-none outline-none focus:ring-0 focus:outline-none w-full overflow-scroll  bg-white [&::placeholder]:text-zinc-400  ",
+              "rounded-xs h-12 min-h-12 max-h-12 resize-none relative shadow-none outline-none focus:ring-0 focus:outline-none w-full overflow-scroll scrollbar-hide bg-white [&::placeholder]:text-zinc-400  ",
               messagePresent
                 ? " transition-all ease-in-out [&::placeholder]:text-transparent"
                 : "transition-all ease-in-out border-none",
@@ -376,13 +376,14 @@ function PureMultimodalInput({
             className="rounded-xs text-xs hover:bg-purple-800/90 hover:text-zinc-50 shadow-none"
             size="sm"
             onClick={async () => {
-              console.log(pricingModel);
               try {
                 setLoading(true);
                 const response = await fetch("/api/submit", {
                   method: "POST",
                   body: JSON.stringify({ pricingModel }),
                 });
+
+                setLoading(false);
 
                 const data = await response.json();
                 const baseURL = "https://app.useautumn.com/sandbox/onboarding";
@@ -422,6 +423,7 @@ export const MultimodalInput = memo(
     if (!equal(prevProps.messages, nextProps.messages)) return false;
     if (prevProps.showConfig !== nextProps.showConfig) return false;
     if (prevProps.setShowConfig !== nextProps.setShowConfig) return false;
+    if (!equal(prevProps.pricingModel, nextProps.pricingModel)) return false;
     // if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType)
     //   return false;
 
