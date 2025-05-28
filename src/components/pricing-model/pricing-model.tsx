@@ -76,7 +76,7 @@ export const PricingModel = ({
         {pricingModel.features.some(
           (feature) => feature.type === "credit_system"
         ) && (
-          <div className="bg-white border border-gray-200 rounded-xs p-4">
+          <div className="bg-white border border-gray-200 rounded-xs p-4 shadow-md">
             {pricingModel.features
               .filter((feature) => feature.type === "credit_system")
               .map((creditFeature) => (
