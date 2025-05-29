@@ -278,37 +278,53 @@ function PureMultimodalInput({
       <div className={cn("flex items-center", messagePresent ? "mt-4" : "")}>
         <div className="group relative mx-auto w-full overflow-hidden rounded-xs bg-gray-300 p-[1px] transition-all duration-300 ease-in-out bg-gradient-to-b from-primary/70 to-primary shadow-md">
           <div className="animate-spin-slow absolute -top-90 -bottom-90 left-10 right-10 bg-gradient-to-r from-transparent via-white/90 to-transparent visible"></div>
-          <Textarea
-            // data-testid="multimodal-input"
-            ref={textareaRef}
-            placeholder="Describe your app's pricing..."
-            value={input}
-            onChange={handleInput}
-            className={cx(
-              "rounded-xs h-12 min-h-12 max-h-12 resize-none relative shadow-none outline-none focus:ring-0 focus:outline-none w-full overflow-scroll scrollbar-hide bg-white [&::placeholder]:text-zinc-400  ",
-              messagePresent
-                ? " transition-all ease-in-out [&::placeholder]:text-transparent"
-                : "transition-all ease-in-out border-none",
-              className
-            )}
-            rows={2}
-            autoFocus
-            onKeyDown={(event) => {
-              if (
-                event.key === "Enter" &&
-                !event.shiftKey &&
-                !event.nativeEvent.isComposing
-              ) {
-                event.preventDefault();
+          <div className="relative">
+            <Textarea
+              // data-testid="multimodal-input"
+              ref={textareaRef}
+              placeholder="Describe your app's pricing..."
+              value={input}
+              onChange={handleInput}
+              className={cx(
+                "rounded-xs h-12 min-h-12 max-h-12 resize-none relative shadow-none outline-none focus:ring-0 focus:outline-none w-full overflow-scroll scrollbar-hide bg-white [&::placeholder]:text-zinc-400 pr-12",
+                messagePresent
+                  ? " transition-all ease-in-out [&::placeholder]:text-transparent"
+                  : "transition-all ease-in-out border-none",
+                className
+              )}
+              rows={2}
+              autoFocus
+              onKeyDown={(event) => {
+                if (
+                  event.key === "Enter" &&
+                  !event.shiftKey &&
+                  !event.nativeEvent.isComposing
+                ) {
+                  event.preventDefault();
 
-                if (status !== "ready") {
-                  toast.error("Please wait for Autumn to finish its response");
-                } else {
-                  submitForm();
+                  if (status !== "ready") {
+                    toast.error(
+                      "Please wait for Autumn to finish its response"
+                    );
+                  } else {
+                    submitForm();
+                  }
                 }
-              }
-            }}
-          />
+              }}
+            />
+            {/* Send Button */}
+            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+              {status === "submitted" ? (
+                <StopButton stop={stop} setMessages={setMessages} />
+              ) : (
+                <SendButton
+                  input={input}
+                  submitForm={submitForm}
+                  uploadQueue={uploadQueue}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </div>
       {/* </AnimatedGradientBorderTW> */}
@@ -466,8 +482,7 @@ function PureStopButton({
   return (
     <Button
       data-testid="stop-button"
-      className="rounded-sm w-8 h-8"
-      variant="gradientPrimary"
+      className="rounded-xs w-8 h-8"
       onClick={(event) => {
         event.preventDefault();
         stop();
@@ -493,8 +508,7 @@ function PureSendButton({
   return (
     <Button
       data-testid="send-button"
-      className="rounded-sm w-8 h-8"
-      variant="gradientPrimary"
+      className="rounded-xs w-8 h-8"
       onClick={(event) => {
         event.preventDefault();
         submitForm();
