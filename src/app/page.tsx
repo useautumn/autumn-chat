@@ -125,107 +125,107 @@ export default function Chat() {
     }
   }, [status, data, setData]);
 
-  useEffect(() => {
-    if (data && data.length > 0 && status !== "ready") {
-      const newPricingModel = data[data.length - 1] as z.infer<
-        typeof PricingModelSchema
-      >;
+  // useEffect(() => {
+  //   if (data && data.length > 0 && status !== "ready") {
+  //     const newPricingModel = data[data.length - 1] as z.infer<
+  //       typeof PricingModelSchema
+  //     >;
 
-      // Only update if we have a valid new pricing model
-      if (newPricingModel?.products && newPricingModel?.features) {
-        setPricingModel((prevModel) => {
-          const updatedModel: z.infer<typeof PricingModelSchema> = {
-            features: prevModel.features
-              .map((prevFeature) => {
-                const newFeature = newPricingModel.features.find(
-                  (f) => f.id === prevFeature.id
-                );
+  //     // Only update if we have a valid new pricing model
+  //     if (newPricingModel?.products && newPricingModel?.features) {
+  //       setPricingModel((prevModel) => {
+  //         const updatedModel: z.infer<typeof PricingModelSchema> = {
+  //           features: prevModel.features
+  //             .map((prevFeature) => {
+  //               const newFeature = newPricingModel.features.find(
+  //                 (f) => f.id === prevFeature.id
+  //               );
 
-                if (!newFeature) return prevFeature;
+  //               if (!newFeature) return prevFeature;
 
-                return {
-                  ...prevFeature,
-                  name: newFeature.name || prevFeature.name,
-                  type: newFeature.type || prevFeature.type,
-                  display: newFeature.display || prevFeature.display,
-                  credit_schema:
-                    newFeature.credit_schema || prevFeature.credit_schema,
-                };
-              })
-              .concat(
-                // Add any new features that weren't in the previous model
-                newPricingModel.features.filter(
-                  (newFeature) =>
-                    !prevModel.features.some((f) => f.id === newFeature.id)
-                )
-              ),
-            products: [
-              // Update existing products
-              ...prevModel.products.map((prevProduct) => {
-                const newProduct = newPricingModel.products.find(
-                  (p: Product) => p.id === prevProduct.id
-                );
+  //               return {
+  //                 ...prevFeature,
+  //                 name: newFeature.name || prevFeature.name,
+  //                 type: newFeature.type || prevFeature.type,
+  //                 display: newFeature.display || prevFeature.display,
+  //                 credit_schema:
+  //                   newFeature.credit_schema || prevFeature.credit_schema,
+  //               };
+  //             })
+  //             .concat(
+  //               // Add any new features that weren't in the previous model
+  //               newPricingModel.features.filter(
+  //                 (newFeature) =>
+  //                   !prevModel.features.some((f) => f.id === newFeature.id)
+  //               )
+  //             ),
+  //           products: [
+  //             // Update existing products
+  //             ...prevModel.products.map((prevProduct) => {
+  //               const newProduct = newPricingModel.products.find(
+  //                 (p: Product) => p.id === prevProduct.id
+  //               );
 
-                if (!newProduct) return prevProduct;
+  //               if (!newProduct) return prevProduct;
 
-                return {
-                  ...prevProduct,
-                  name: newProduct.name || prevProduct.name,
-                  is_add_on: newProduct.is_add_on ?? prevProduct.is_add_on,
-                  // is_default: newProduct.is_default ?? prevProduct.is_default,
-                  items: [
-                    // Update existing items
-                    ...(prevProduct.items?.map((prevItem) => {
-                      const newItem = newProduct.items?.find(
-                        (i: ProductItem) => i.feature_id === prevItem.feature_id
-                      );
-                      if (!newItem) return prevItem;
+  //               return {
+  //                 ...prevProduct,
+  //                 name: newProduct.name || prevProduct.name,
+  //                 is_add_on: newProduct.is_add_on ?? prevProduct.is_add_on,
+  //                 // is_default: newProduct.is_default ?? prevProduct.is_default,
+  //                 items: [
+  //                   // Update existing items
+  //                   ...(prevProduct.items?.map((prevItem) => {
+  //                     const newItem = newProduct.items?.find(
+  //                       (i: ProductItem) => i.feature_id === prevItem.feature_id
+  //                     );
+  //                     if (!newItem) return prevItem;
 
-                      return {
-                        ...prevItem,
-                        included_usage:
-                          newItem.included_usage ?? prevItem.included_usage,
-                        interval: newItem.interval || prevItem.interval,
-                        usage_model:
-                          newItem.usage_model || prevItem.usage_model,
-                        price: newItem.price ?? prevItem.price,
-                        billing_units:
-                          newItem.billing_units ?? prevItem.billing_units,
-                      };
-                    }) || []),
-                    // Add new items that aren't in prevProduct.items
-                    ...(newProduct.items ?? []).filter(
-                      (newItem) =>
-                        !prevProduct.items?.some(
-                          (i) => i.feature_id === newItem.feature_id
-                        )
-                    ),
-                  ].filter((item) => {
-                    if (ProductItemSchema.safeParse(item).success) {
-                      return true;
-                    }
-                    return false;
-                  }),
-                };
-              }),
-              // Add any new products that weren't in the previous model
-              ...newPricingModel.products
-                .filter(
-                  (newProduct) =>
-                    !prevModel.products.some((p) => p.id === newProduct.id)
-                )
-                .filter(
-                  (product) =>
-                    typeof product.id === "string" && product.id.trim() !== ""
-                ),
-            ],
-          };
+  //                     return {
+  //                       ...prevItem,
+  //                       included_usage:
+  //                         newItem.included_usage ?? prevItem.included_usage,
+  //                       interval: newItem.interval || prevItem.interval,
+  //                       usage_model:
+  //                         newItem.usage_model || prevItem.usage_model,
+  //                       price: newItem.price ?? prevItem.price,
+  //                       billing_units:
+  //                         newItem.billing_units ?? prevItem.billing_units,
+  //                     };
+  //                   }) || []),
+  //                   // Add new items that aren't in prevProduct.items
+  //                   ...(newProduct.items ?? []).filter(
+  //                     (newItem) =>
+  //                       !prevProduct.items?.some(
+  //                         (i) => i.feature_id === newItem.feature_id
+  //                       )
+  //                   ),
+  //                 ].filter((item) => {
+  //                   if (ProductItemSchema.safeParse(item).success) {
+  //                     return true;
+  //                   }
+  //                   return false;
+  //                 }),
+  //               };
+  //             }),
+  //             // Add any new products that weren't in the previous model
+  //             ...newPricingModel.products
+  //               .filter(
+  //                 (newProduct) =>
+  //                   !prevModel.products.some((p) => p.id === newProduct.id)
+  //               )
+  //               .filter(
+  //                 (product) =>
+  //                   typeof product.id === "string" && product.id.trim() !== ""
+  //               ),
+  //           ],
+  //         };
 
-          return updatedModel;
-        });
-      }
-    }
-  }, [data, status]);
+  //         return updatedModel;
+  //       });
+  //     }
+  //   }
+  // }, [data, status]);
 
   useEffect(() => {
     if (messages.length > 0) {
