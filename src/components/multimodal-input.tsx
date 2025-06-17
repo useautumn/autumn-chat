@@ -386,15 +386,9 @@ function PureMultimodalInput({
                 setLoading(false);
 
                 const data = await response.json();
-                const baseURL = "https://app.useautumn.com/sandbox/onboarding";
-                const authUrl = "https://accounts.useautumn.com/sign-in";
-                // const baseURL = "http://localhost:3000/sandbox/onboarding";
-                // const authUrl =
-                //   "https://massive-ghoul-59.accounts.dev/sign-in";
-                window.open(
-                  `${authUrl}?redirect_url=${baseURL}?token=${data.id}`,
-                  "_blank"
-                );
+                const baseURL = "https://app.useautumn.com/sign-in";
+
+                window.open(`${baseURL}?token=${data.id}`, "_blank");
               } catch (error) {
               } finally {
                 setLoading(false);
