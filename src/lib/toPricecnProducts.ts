@@ -311,11 +311,3 @@ export const toPricecnProductWithBilling = ({
     buttonText: "Get Started",
   };
 };
-
-// side note, what the fuck does this do?
-function patchObject<T>(prev: T, next: Partial<T>): T {
-  return {
-    ...prev,
-    ...next,
-  };
-}
