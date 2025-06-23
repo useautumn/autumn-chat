@@ -172,9 +172,9 @@ export const featurePricetoPricecnItem = ({
   const includedUsageStr =
     nullish(item.included_usage) || item.included_usage == 0
       ? ""
-      : `${numberWithCommas(item.included_usage as number)} ${
-          withNameAfterIncluded ? `${includedFeatureName} ` : ""
-        }included`;
+      : `${numberWithCommas(
+          item.included_usage as number
+        )} ${includedFeatureName} `;
 
   const priceStr = getPriceText({ item });
   const billingFeatureName = getFeatureName({
@@ -221,6 +221,14 @@ export const toPricecnProduct = ({
       }
 
       const feature = features.find((f) => f.id == item.feature_id);
+
+      if (isFeaturePriceItem(item)) {
+        return featurePricetoPricecnItem({
+          feature,
+          item,
+        });
+      }
+
       return featureToPricecnItem({
         feature,
         item,
@@ -243,20 +251,19 @@ export const toPricecnProduct = ({
 
 export const groupProductsByBilling = (products: Product[]) => {
   const groups = new Map<string, { monthly?: Product; yearly?: Product }>();
-  
-  products.forEach(product => {
-    const isMonthly = product.name.toLowerCase().includes('monthly');
-    const isYearly = product.name.toLowerCase().includes('yearly') || 
-                     product.items?.some(item => item.interval === 'year');
-    
-    const baseName = product.name
-      .replace(/\s*(monthly|yearly)\s*/i, '')
-      .trim();
-    
+
+  products.forEach((product) => {
+    const isMonthly = product.name.toLowerCase().includes("monthly");
+    const isYearly =
+      product.name.toLowerCase().includes("yearly") ||
+      product.items?.some((item) => item.interval === "year");
+
+    const baseName = product.name.replace(/\s*(monthly|yearly)\s*/i, "").trim();
+
     if (!groups.has(baseName)) {
       groups.set(baseName, {});
     }
-    
+
     const group = groups.get(baseName)!;
     if (isMonthly) {
       group.monthly = product;
@@ -266,7 +273,7 @@ export const groupProductsByBilling = (products: Product[]) => {
       group.monthly = product; // default to monthly
     }
   });
-  
+
   return Array.from(groups.entries()).map(([name, group]) => ({
     ...group,
     base: group.monthly || group.yearly!,
@@ -282,26 +289,35 @@ export const toPricecnProductWithBilling = ({
 }) => {
   const { monthly, yearly, base } = productGroup;
   const baseProduct = monthly || yearly || base;
-  
+
   const items = sortProductItems([...baseProduct.items], features)
-    .filter(item => !isPriceItem(item))
+    .filter((item) => !isPriceItem(item))
     .map((item) => {
       const feature = features.find((f) => f.id == item.feature_id);
+      if (isFeaturePriceItem(item)) {
+        return featurePricetoPricecnItem({ feature, item });
+      }
       return featureToPricecnItem({ feature, item });
     })
     .filter(notNullish);
-  
-  const getPrice = (product: Product) => getPricecnPrice({
-    items: sortProductItems([...product.items], features),
-    features,
-  });
-  
-  const price = monthly ? getPrice(monthly) : yearly ? getPrice(yearly) : 
-                { primaryText: "Free", secondaryText: " " };
+
+  const getPrice = (product: Product) =>
+    getPricecnPrice({
+      items: sortProductItems([...product.items], features),
+      features,
+    });
+
+  const price = monthly
+    ? getPrice(monthly)
+    : yearly
+    ? getPrice(yearly)
+    : { primaryText: "Free", secondaryText: " " };
   const priceAnnual = yearly && monthly ? getPrice(yearly) : undefined;
-  
-  const cleanName = baseProduct.name.replace(/\s*(monthly|yearly)\s*/i, '').trim();
-  
+
+  const cleanName = baseProduct.name
+    .replace(/\s*(monthly|yearly)\s*/i, "")
+    .trim();
+
   return {
     id: baseProduct.id,
     name: cleanName,
