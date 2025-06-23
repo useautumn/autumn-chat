@@ -24,7 +24,7 @@ You will then update the PRICING_MODEL based on the updated list of messages fro
 
 <IMPORTANT_RULES> 
 - A product item must have either a price or a feature, or both. Ensure you follow the schema.
-- Annual and monthly price variants should be 2 separate products.
+- Yearly and monthly price variants should be 2 separate products. Format the names as "<Product Name> Yearly" and "<Product Name> Monthly".
 - Products without a price item should have is_default as true, unless the user specifies otherwise.
 - Determine whether the product is an add-on, marked with is_add_on as true, such as if users can buy additional things separately to the base product.
 - If a user asks you to update a product, ENSURE you use the same product ID as the latest pricing model. This is so that the client update doesn't break.

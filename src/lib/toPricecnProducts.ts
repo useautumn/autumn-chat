@@ -172,9 +172,9 @@ export const featurePricetoPricecnItem = ({
   const includedUsageStr =
     nullish(item.included_usage) || item.included_usage == 0
       ? ""
-      : `${numberWithCommas(item.included_usage as number)} ${
-          withNameAfterIncluded ? `${includedFeatureName} ` : ""
-        }included`;
+      : `${numberWithCommas(
+          item.included_usage as number
+        )} ${includedFeatureName} `;
 
   const priceStr = getPriceText({ item });
   const billingFeatureName = getFeatureName({
@@ -212,59 +212,118 @@ export const toPricecnProduct = ({
   product: Product;
   features: Feature[];
 }) => {
-  try {
-    if (!product.items) {
-      return null;
-    }
+  const sortedItems = sortProductItems([...product.items], features);
 
-    const items = structuredClone(product.items);
+  const items = sortedItems
+    .map((item) => {
+      if (isPriceItem(item)) {
+        return null;
+      }
 
-    sortProductItems(items, features);
+      const feature = features.find((f) => f.id == item.feature_id);
 
-    const priceExists = items.some(
-      (i) => isPriceItem(i) || isFeaturePriceItem(i)
-    );
+      if (isFeaturePriceItem(item)) {
+        return featurePricetoPricecnItem({
+          feature,
+          item,
+        });
+      }
 
-    const price = getPricecnPrice({ items, features });
-    const itemsWithoutPrice = priceExists ? items.slice(1) : items;
+      return featureToPricecnItem({
+        feature,
+        item,
+      });
+    })
+    .filter(notNullish);
 
-    const pricecnItems = itemsWithoutPrice
+  const price = getPricecnPrice({
+    items: sortedItems,
+    features,
+  });
 
-      .map((i) => {
-        const feature = features.find((f) => f.id == i.feature_id);
-        if (!feature) {
-          return null;
-        }
-
-        if (isFeaturePriceItem(i)) {
-          return featurePricetoPricecnItem({ feature, item: i });
-        } else {
-          return featureToPricecnItem({ feature, item: i });
-        }
-      })
-      .filter(notNullish);
-
-    return {
-      id: product.id,
-      name: product.name,
-      buttonText: "Get Started",
-      price: price,
-      items: pricecnItems,
-      // buttonUrl: org.stripe_config?.success_url,
-    };
-  } catch (error) {
-    console.log("Product", product);
-    console.error(error);
-    return null;
-  }
+  return {
+    id: product.id,
+    name: product.name,
+    price,
+    items,
+  };
 };
 
-function patchObject<T>(prev: T, next: Partial<T>): T {
-  const result = { ...prev };
-  for (const key in next) {
-    if (next[key] !== undefined) {
-      result[key] = next[key];
+export const groupProductsByBilling = (products: Product[]) => {
+  const groups = new Map<string, { monthly?: Product; yearly?: Product }>();
+
+  products.forEach((product) => {
+    const isMonthly = product.name.toLowerCase().includes("monthly");
+    const isYearly =
+      product.name.toLowerCase().includes("yearly") ||
+      product.items?.some((item) => item.interval === "year");
+
+    const baseName = product.name.replace(/\s*(monthly|yearly)\s*/i, "").trim();
+
+    if (!groups.has(baseName)) {
+      groups.set(baseName, {});
     }
-  }
-  return result;
-}
+
+    const group = groups.get(baseName)!;
+    if (isMonthly) {
+      group.monthly = product;
+    } else if (isYearly) {
+      group.yearly = product;
+    } else {
+      group.monthly = product; // default to monthly
+    }
+  });
+
+  return Array.from(groups.entries()).map(([name, group]) => ({
+    ...group,
+    base: group.monthly || group.yearly!,
+  }));
+};
+
+export const toPricecnProductWithBilling = ({
+  productGroup,
+  features,
+}: {
+  productGroup: { monthly?: Product; yearly?: Product; base: Product };
+  features: Feature[];
+}) => {
+  const { monthly, yearly, base } = productGroup;
+  const baseProduct = monthly || yearly || base;
+
+  const items = sortProductItems([...baseProduct.items], features)
+    .filter((item) => !isPriceItem(item))
+    .map((item) => {
+      const feature = features.find((f) => f.id == item.feature_id);
+      if (isFeaturePriceItem(item)) {
+        return featurePricetoPricecnItem({ feature, item });
+      }
+      return featureToPricecnItem({ feature, item });
+    })
+    .filter(notNullish);
+
+  const getPrice = (product: Product) =>
+    getPricecnPrice({
+      items: sortProductItems([...product.items], features),
+      features,
+    });
+
+  const price = monthly
+    ? getPrice(monthly)
+    : yearly
+    ? getPrice(yearly)
+    : { primaryText: "Free", secondaryText: " " };
+  const priceAnnual = yearly && monthly ? getPrice(yearly) : undefined;
+
+  const cleanName = baseProduct.name
+    .replace(/\s*(monthly|yearly)\s*/i, "")
+    .trim();
+
+  return {
+    id: baseProduct.id,
+    name: cleanName,
+    price,
+    priceAnnual,
+    items,
+    buttonText: "Get Started",
+  };
+};
